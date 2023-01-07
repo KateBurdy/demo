@@ -1,51 +1,42 @@
 package com.pluralsight.conferencedemo.controllers;
 
 import com.pluralsight.conferencedemo.models.Session;
-import com.pluralsight.conferencedemo.repositories.SessionRepository;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.pluralsight.conferencedemo.services.SessionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/sessions")
+@RequiredArgsConstructor
 public class SessionsController {
-    @Autowired
-    private SessionRepository sessionRepository;
+
+    private SessionService sessionService;
 
     @GetMapping
     public List<Session> list() {
-        return sessionRepository.findAll();
+        return sessionService.findAllSessions();
     }
 
     @GetMapping("{id}")
     public Session get(@PathVariable Long id) {
-        return sessionRepository.getOne(id);
+        return sessionService.getSessionByID(id);
     }
 
     @PostMapping
     public Session create(@RequestBody final Session session) {
-        return sessionRepository.saveAndFlush(session);
+        return sessionService.saveAndFlushsession(session);
     }
 
     @DeleteMapping("{id}")
     public void delete(@PathVariable Long id) {
-        //Also need to check for children records before deleting.
-        sessionRepository.deleteById(id);
+        sessionService.deleteSessionid(id);
     }
 
     @PutMapping("{id}")
-    public Session update(
-            @PathVariable Long id,
-            @RequestBody Session session
-    ) {
-        //because this is a PUT, we expect all attributes to be passed in. A PATCH would only need what has changed.
-        //TODO: Add validation that all attributes are passed in, otherwise return a 400 bad payload
-        Session existingSession = sessionRepository.getOne(id);
-        BeanUtils.copyProperties(session, existingSession, "session_id");
-        return sessionRepository
-                .saveAndFlush(existingSession);
+    public Session update(@PathVariable Long id, @RequestBody Session session) {
+        return sessionService.updateSession(session, id);
     }
 
 }
